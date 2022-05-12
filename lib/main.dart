@@ -1,5 +1,8 @@
 import 'package:chatapp/view/auth_screens/log_in_screen.dart';
 import 'package:chatapp/view/auth_screens/sign_up_screen.dart';
+import 'package:chatapp/view/get_screen.dart';
+import 'package:chatapp/view/home_screen.dart';
+import 'package:chatapp/view/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -20,10 +23,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.green,
       ),
-      home: const SignUpScreen(),
+      home: const SplashScreen(),
     );
   }
 }

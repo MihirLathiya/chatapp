@@ -15,7 +15,6 @@ class EmailAuth {
         return user;
       } else {
         print('SignUp Faild');
-        return user;
       }
     } catch (e) {
       print(e);
@@ -35,7 +34,6 @@ class EmailAuth {
         return user;
       } else {
         print('LogIn Faild');
-        return user;
       }
     } catch (e) {
       print(e);
@@ -43,7 +41,7 @@ class EmailAuth {
     return null;
   }
 
-  Future logOut() async {
+  static Future logOut() async {
     try {
       firebaseAuth.signOut();
     } catch (e) {

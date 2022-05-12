@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 class ChatRoom extends StatelessWidget {
   final Map<String, dynamic>? userMap;
   final String? chatRoomId;
+  final String? name;
+  final String? image;
 
   final _message = TextEditingController();
 
@@ -13,6 +15,8 @@ class ChatRoom extends StatelessWidget {
     Key? key,
     this.userMap,
     this.chatRoomId,
+    this.name,
+    this.image,
   }) : super(key: key);
 
   onSendMessage() async {
@@ -36,72 +40,65 @@ class ChatRoom extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: Container(
-        height: 100,
-        width: double.infinity,
-        alignment: Alignment.center,
-        child: Row(
-          children: [
-            Expanded(
-              child: TsField(
-                hintText: 'Write here...',
-                validator: (value) {
-                  return null;
-                },
-                controller: _message,
-                hide: false,
-              ),
-            ),
-            IconButton(
-              onPressed: () {
-                // await onSend();
-                onSendMessage();
-              },
-              icon: const Icon(Icons.send_outlined),
-            )
-          ],
-        ),
-      ),
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Row(
           children: [
+            GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: const Icon(Icons.arrow_back),
+            ),
+            SizedBox(
+              width: 15,
+            ),
             Container(
               clipBehavior: Clip.antiAliasWithSaveLayer,
               height: 35,
               width: 35,
               decoration: const BoxDecoration(
-                  shape: BoxShape.circle, color: Colors.blue),
+                shape: BoxShape.circle,
+                color: Colors.blue,
+              ),
               child: Image.network(
-                '${userMap!['image']}',
+                '$image',
                 fit: BoxFit.cover,
               ),
             ),
             const SizedBox(
               width: 10,
             ),
-            Text('${userMap!['name']}'),
+            Text('$name'),
           ],
         ),
       ),
-      resizeToAvoidBottomInset: false,
-      body: SingleChildScrollView(
+      body: Container(
+        height: double.infinity,
+        width: double.infinity,
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: NetworkImage(
+              'https://wallpapercave.com/wp/wp4410716.jpg',
+            ),
+            fit: BoxFit.cover,
+          ),
+        ),
         child: Column(
           children: [
-            Container(
-              height: 500,
-              width: double.infinity,
-              child: StreamBuilder<QuerySnapshot>(
-                stream: firebaseFirestore
-                    .collection('chatRoom')
-                    .doc(chatRoomId)
-                    .collection('chats')
-                    .orderBy('time', descending: false)
-                    .snapshots(),
-                builder: (BuildContext context,
-                    AsyncSnapshot<QuerySnapshot> snapshot) {
-                  if (snapshot.data != null) {
-                    return ListView.builder(
+            StreamBuilder<QuerySnapshot>(
+              stream: firebaseFirestore
+                  .collection('chatRoom')
+                  .doc(chatRoomId)
+                  .collection('chats')
+                  .orderBy('time', descending: false)
+                  .snapshots(),
+              builder: (BuildContext context,
+                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (snapshot.data != null) {
+                  return Expanded(
+                    child: ListView.builder(
+                      physics: const BouncingScrollPhysics(),
                       itemCount: snapshot.data!.docs.length,
                       itemBuilder: (context, index) {
                         Map<String, dynamic> map =
@@ -132,11 +129,42 @@ class ChatRoom extends StatelessWidget {
                           ),
                         );
                       },
-                    );
-                  } else {
-                    return Container();
-                  }
-                },
+                    ),
+                  );
+                } else {
+                  return Container();
+                }
+              },
+            ),
+            // Spacer(),
+            Container(
+              height: 60,
+              width: double.infinity,
+              alignment: Alignment.center,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 50,
+                      width: double.infinity,
+                      child: TsField(
+                        align: TextAlign.left,
+                        hintText: 'Write here...',
+                        validator: (value) {
+                          return null;
+                        },
+                        controller: _message,
+                        hide: false,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      onSendMessage();
+                    },
+                    icon: const Icon(Icons.send_outlined),
+                  )
+                ],
               ),
             ),
           ],

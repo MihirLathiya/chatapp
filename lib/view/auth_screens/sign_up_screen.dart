@@ -198,6 +198,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
             );
             print('SignUp Successful');
           } else {
+            setState(() {
+              isLoading = false;
+            });
             print('SignUp Failed');
           }
         },
