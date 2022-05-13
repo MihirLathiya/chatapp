@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 
@@ -45,10 +46,12 @@ class _ChatRoomState extends State<ChatRoom> {
     }
   }
 
+  String? fileName;
+
   /// upload image
-  ///
+
   Future uploadImg() async {
-    String fileName = Uuid().v1();
+    fileName = Uuid().v1();
     int status = 1;
     await firebaseFirestore
         .collection('chatRoom')
@@ -180,28 +183,41 @@ class _ChatRoomState extends State<ChatRoom> {
                                   ),
                                 ),
                               )
-                            : Container(
-                                width: double.infinity,
-                                alignment: map['sendBy'] ==
-                                        firebaseAuth.currentUser!.displayName
-                                    ? Alignment.topRight
-                                    : Alignment.topLeft,
+                            : GestureDetector(
+                                onTap: () {
+                                  Get.to(
+                                    () => ShowImage(imageUrl: map['message']),
+                                  );
+                                },
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 15),
-                                  margin: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 15),
-                                  height: 200,
-                                  width: 200,
-                                  alignment: Alignment.center,
-                                  child: map['message'] != ''
-                                      ? Image.network(
-                                          map['message'],
-                                          fit: BoxFit.cover,
-                                        )
-                                      : const Center(
-                                          child: CircularProgressIndicator(),
-                                        ),
+                                  width: double.infinity,
+                                  alignment: map['sendBy'] ==
+                                          firebaseAuth.currentUser!.displayName
+                                      ? Alignment.topRight
+                                      : Alignment.topLeft,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 15),
+                                    margin: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 15),
+                                    height: 200,
+                                    width: 200,
+                                    alignment: Alignment.center,
+                                    child: map['message'] != ''
+                                        ? ClipRRect(
+                                            borderRadius:
+                                                const BorderRadius.all(
+                                              Radius.circular(12),
+                                            ),
+                                            child: Image.network(
+                                              map['message'],
+                                              fit: BoxFit.cover,
+                                            ),
+                                          )
+                                        : const Center(
+                                            child: CircularProgressIndicator(),
+                                          ),
+                                  ),
                                 ),
                               );
                       },
@@ -270,5 +286,19 @@ class _ChatRoomState extends State<ChatRoom> {
     } else {
       print('some text add');
     }
+  }
+}
+
+class ShowImage extends StatelessWidget {
+  final String? imageUrl;
+  ShowImage({Key? key, this.imageUrl}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: double.infinity,
+      width: double.infinity,
+      child: Image.network(imageUrl!),
+    );
   }
 }

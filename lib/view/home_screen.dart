@@ -6,6 +6,8 @@ import 'package:chatapp/view/chat_room.dart';
 import 'package:chatapp/view/profile_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import '../common/text.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -26,9 +28,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  Map<String, dynamic>? userMap;
-  List<String> menu = ['Profile'];
-  String user1 = 'hi';
+  bool mode = true;
+
+  // Map<String, dynamic>? userMap;
+  // List<String> menu = ['Profile'];
+  // String user1 = 'hi';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,6 +45,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           latterSpace: 1.5,
         ),
         actions: [
+          Switch(
+              value: mode,
+              onChanged: (value) {
+                setState(() {
+                  mode = value;
+                });
+                if (mode == true) {
+                  Get.changeTheme(ThemeData.dark());
+                } else {
+                  Get.changeTheme(ThemeData.light());
+                }
+              }),
           PopupMenuButton(
             itemBuilder: (context) => [
               PopupMenuItem(
@@ -189,7 +205,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                       MaterialPageRoute(
                                         builder: (context) => ChatRoom(
                                             chatRoomId: roomId,
-                                            hi: '${data.get('status')}',
                                             image: '${data.get('image')}',
                                             name: '${data.get('name')}'),
                                       ),

@@ -123,6 +123,8 @@ class _LogInScreenState extends State<LogInScreen> {
             setState(() {
               isLoading = false;
             });
+            Get.snackbar('Welcome Back', 'How are you?');
+
             Get.off(
               () => const HomeScreen(),
             );
@@ -131,6 +133,8 @@ class _LogInScreenState extends State<LogInScreen> {
             setState(() {
               isLoading = false;
             });
+            Get.snackbar('LogIn Failed', 'Wrong email & password');
+
             print('LogIn Failed');
           }
         },

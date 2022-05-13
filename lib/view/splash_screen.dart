@@ -5,6 +5,7 @@ import 'package:chatapp/constant.dart';
 import 'package:chatapp/view/auth_screens/log_in_screen.dart';
 import 'package:chatapp/view/home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -46,11 +47,18 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       backgroundColor: Colors.green.shade500,
       body: Center(
-        child: Ts(
-          text: "Let 's Talk",
-          size: 30,
-          weight: FontWeight.w900,
-          color: Colors.white,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Lottie.asset('assets/images/78301-conversation.json',
+                height: 200, width: 200),
+            Ts(
+              text: "Let'_s Tal_k",
+              size: 35,
+              weight: FontWeight.w900,
+              color: Colors.white,
+            ),
+          ],
         ),
       ),
     );
