@@ -1,39 +1,86 @@
+import 'dart:io';
+
 import 'package:chatapp/common/text_field.dart';
 import 'package:chatapp/constant.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:uuid/uuid.dart';
 
-class ChatRoom extends StatelessWidget {
-  final Map<String, dynamic>? userMap;
+class ChatRoom extends StatefulWidget {
   final String? chatRoomId;
   final String? name;
   final String? image;
-
-  final _message = TextEditingController();
+  final String? hi;
 
   ChatRoom({
     Key? key,
-    this.userMap,
     this.chatRoomId,
     this.name,
     this.image,
+    this.hi,
   }) : super(key: key);
 
-  onSendMessage() async {
-    if (_message.text.isNotEmpty) {
-      Map<String, dynamic> messages = {
-        'sendBy': firebaseAuth.currentUser!.displayName,
-        'message': _message.text,
-        'time': FieldValue.serverTimestamp()
-      };
+  @override
+  State<ChatRoom> createState() => _ChatRoomState();
+}
+
+class _ChatRoomState extends State<ChatRoom> {
+  File? images;
+  final picker = ImagePicker();
+  final _message = TextEditingController();
+
+  /// pick Image
+  Future setImage() async {
+    var pickedFile = await picker.getImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(
+        () {
+          images = File(pickedFile.path);
+          uploadImg();
+        },
+      );
+    }
+  }
+
+  /// upload image
+  ///
+  Future uploadImg() async {
+    String fileName = Uuid().v1();
+    int status = 1;
+    await firebaseFirestore
+        .collection('chatRoom')
+        .doc(widget.chatRoomId)
+        .collection('chats')
+        .doc(fileName)
+        .set({
+      'sendBy': firebaseAuth.currentUser!.displayName,
+      'message': '',
+      'type': 'img',
+      'time': FieldValue.serverTimestamp()
+    });
+    var ref =
+        FirebaseStorage.instance.ref().child('images').child('$fileName.jpg');
+    var uploadTask = await ref.putFile(images!).catchError((error) async {
       await firebaseFirestore
           .collection('chatRoom')
-          .doc(chatRoomId)
+          .doc(widget.chatRoomId)
           .collection('chats')
-          .add(messages);
-      _message.clear();
-    } else {
-      print('some text add');
+          .doc(fileName)
+          .delete();
+      status = 0;
+    });
+    if (status == 1) {
+      String imageUrl = await uploadTask.ref.getDownloadURL();
+      await firebaseFirestore
+          .collection('chatRoom')
+          .doc(widget.chatRoomId)
+          .collection('chats')
+          .doc(fileName)
+          .update({'message': imageUrl});
+      print(imageUrl);
     }
   }
 
@@ -50,7 +97,7 @@ class ChatRoom extends StatelessWidget {
               },
               child: const Icon(Icons.arrow_back),
             ),
-            SizedBox(
+            const SizedBox(
               width: 15,
             ),
             Container(
@@ -62,14 +109,14 @@ class ChatRoom extends StatelessWidget {
                 color: Colors.blue,
               ),
               child: Image.network(
-                '$image',
+                '${widget.image}',
                 fit: BoxFit.cover,
               ),
             ),
             const SizedBox(
               width: 10,
             ),
-            Text('$name'),
+            Text('${widget.name}'),
           ],
         ),
       ),
@@ -89,7 +136,7 @@ class ChatRoom extends StatelessWidget {
             StreamBuilder<QuerySnapshot>(
               stream: firebaseFirestore
                   .collection('chatRoom')
-                  .doc(chatRoomId)
+                  .doc(widget.chatRoomId)
                   .collection('chats')
                   .orderBy('time', descending: false)
                   .snapshots(),
@@ -103,31 +150,60 @@ class ChatRoom extends StatelessWidget {
                       itemBuilder: (context, index) {
                         Map<String, dynamic> map =
                             snapshot.data!.docs[index].data();
-                        return Container(
-                          width: double.infinity,
-                          alignment: map['sendBy'] ==
-                                  firebaseAuth.currentUser!.displayName
-                              ? Alignment.topRight
-                              : Alignment.topLeft,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 15),
-                            margin: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 15),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: Colors.green,
-                            ),
-                            child: Text(
-                              map['message'],
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        );
+                        return map['type'] == 'text'
+                            ? Container(
+                                width: double.infinity,
+                                alignment: map['sendBy'] ==
+                                        firebaseAuth.currentUser!.displayName
+                                    ? Alignment.topRight
+                                    : Alignment.topLeft,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 15),
+                                  margin: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 15),
+                                  decoration: const BoxDecoration(
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(12),
+                                      bottomLeft: Radius.circular(12),
+                                      bottomRight: Radius.circular(12),
+                                    ),
+                                    color: Colors.green,
+                                  ),
+                                  child: Text(
+                                    map['message'],
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : Container(
+                                width: double.infinity,
+                                alignment: map['sendBy'] ==
+                                        firebaseAuth.currentUser!.displayName
+                                    ? Alignment.topRight
+                                    : Alignment.topLeft,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 15),
+                                  margin: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 15),
+                                  height: 200,
+                                  width: 200,
+                                  alignment: Alignment.center,
+                                  child: map['message'] != ''
+                                      ? Image.network(
+                                          map['message'],
+                                          fit: BoxFit.cover,
+                                        )
+                                      : const Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                ),
+                              );
                       },
                     ),
                   );
@@ -148,6 +224,10 @@ class ChatRoom extends StatelessWidget {
                       height: 50,
                       width: double.infinity,
                       child: TsField(
+                        icon: Icons.document_scanner,
+                        onPress: () {
+                          setImage();
+                        },
                         align: TextAlign.left,
                         hintText: 'Write here...',
                         validator: (value) {
@@ -171,5 +251,24 @@ class ChatRoom extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  onSendMessage() async {
+    if (_message.text.isNotEmpty) {
+      Map<String, dynamic> messages = {
+        'sendBy': firebaseAuth.currentUser!.displayName,
+        'message': _message.text,
+        'type': 'text',
+        'time': FieldValue.serverTimestamp()
+      };
+      await firebaseFirestore
+          .collection('chatRoom')
+          .doc(widget.chatRoomId)
+          .collection('chats')
+          .add(messages);
+      _message.clear();
+    } else {
+      print('some text add');
+    }
   }
 }

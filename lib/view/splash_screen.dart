@@ -32,7 +32,8 @@ class _SplashScreenState extends State<SplashScreen> {
         () => Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => data != null ? HomeScreen() : LogInScreen(),
+            builder: (context) =>
+                data != null ? const HomeScreen() : const LogInScreen(),
           ),
         ),
       ),

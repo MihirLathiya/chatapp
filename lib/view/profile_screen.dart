@@ -1,7 +1,12 @@
+import 'dart:io';
+
 import 'package:chatapp/common/text.dart';
 import 'package:chatapp/constant.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:uuid/uuid.dart';
 
 class ProfileScreen extends StatefulWidget {
   ProfileScreen({Key? key}) : super(key: key);
@@ -61,10 +66,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 shape: BoxShape.circle,
                 color: Colors.grey,
               ),
-              child: Image.network(
-                '$image',
-                fit: BoxFit.cover,
-              ),
+              child: image == null
+                  ? const Center(child: CupertinoActivityIndicator())
+                  : Image.network(
+                      '$image',
+                      fit: BoxFit.cover,
+                    ),
             ),
             const SizedBox(
               height: 30,
@@ -73,7 +80,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               height: 30,
             ),
             ListTile(
-              leading: Icon(Icons.person),
+              leading: const Icon(Icons.person),
               title: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

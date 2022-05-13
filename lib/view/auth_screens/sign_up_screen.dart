@@ -211,7 +211,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             'password': password.text,
             'name': userName.text,
             'image': imageUrl,
-            'status': 'Unavailable',
+            'status': 'Offline',
           },
         ),
       );

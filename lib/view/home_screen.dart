@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:chatapp/common/text_field.dart';
 import 'package:chatapp/constant.dart';
 import 'package:chatapp/service/email_auth.dart';
@@ -8,8 +6,6 @@ import 'package:chatapp/view/chat_room.dart';
 import 'package:chatapp/view/profile_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-
 import '../common/text.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -19,7 +15,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final _search = TextEditingController();
   String chatRoomId(String user1, String user2) {
     if (user1[0].toLowerCase().codeUnitAt(0) >
@@ -32,7 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Map<String, dynamic>? userMap;
   List<String> menu = ['Profile'];
-
+  String user1 = 'hi';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,27 +66,26 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               PopupMenuItem(
-                child: GestureDetector(
-                  onTap: () async {
-                    await EmailAuth.logOut().whenComplete(
-                      () => Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const LogInScreen(),
+                onTap: () async {
+                  await EmailAuth.logOut();
+                  storage.remove('email').whenComplete(
+                        () => Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const LogInScreen(),
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: const [
-                      Icon(
-                        Icons.login,
-                        color: Colors.black,
-                      ),
-                      Text("Log Out"),
-                    ],
-                  ),
+                      );
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: const [
+                    Icon(
+                      Icons.login,
+                      color: Colors.black,
+                    ),
+                    Text("Log Out"),
+                  ],
                 ),
               ),
             ],
@@ -177,67 +172,57 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: ListView.builder(
                     itemCount: snapshot.data!.docs.length,
                     itemBuilder: (BuildContext context, int index) {
-                      print(
-                          '${collectionReference.doc(firebaseAuth.currentUser!.uid)}');
                       var data = snapshot.data!.docs[index];
 
-                      snapshot.data!.docs.forEach((element) {
-                        element['email'] != firebaseAuth.currentUser!.email;
-                      });
-
-                      return Column(
-                        children: [
-                          ListTile(
-                            onTap: () {
-                              String roomId = chatRoomId(
-                                  '${firebaseAuth.currentUser!.displayName}',
-                                  '${data.get('name')}');
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ChatRoom(
-                                      chatRoomId: roomId,
-                                      image: '${data.get('image')}',
-                                      name: '${data.get('name')}'),
+                      return firebaseAuth.currentUser!.email ==
+                              snapshot.data!.docs[index]['email']
+                          ? const SizedBox()
+                          : Column(
+                              children: [
+                                ListTile(
+                                  onTap: () {
+                                    String roomId = chatRoomId(
+                                        '${firebaseAuth.currentUser!.displayName}',
+                                        '${data.get('name')}');
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ChatRoom(
+                                            chatRoomId: roomId,
+                                            hi: '${data.get('status')}',
+                                            image: '${data.get('image')}',
+                                            name: '${data.get('name')}'),
+                                      ),
+                                    );
+                                  },
+                                  leading: Container(
+                                    height: 50,
+                                    width: 50,
+                                    clipBehavior: Clip.antiAliasWithSaveLayer,
+                                    decoration: const BoxDecoration(
+                                        shape: BoxShape.circle),
+                                    child: Image.network(
+                                      '${data.get('image')}',
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  title: Ts(
+                                    text: '${data.get('name')}',
+                                    weight: FontWeight.w900,
+                                  ),
+                                  subtitle: Ts(
+                                    text: '${data.get('email')}',
+                                  ),
                                 ),
-                              );
-                            },
-                            leading: Container(
-                              height: 50,
-                              width: 50,
-                              clipBehavior: Clip.antiAliasWithSaveLayer,
-                              decoration:
-                                  const BoxDecoration(shape: BoxShape.circle),
-                              child: Image.network(
-                                firebaseAuth.currentUser!.photoURL ==
-                                        snapshot.data!.docs[index]['image']
-                                    ? ''
-                                    : '${data.get('image')}',
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                            title: Ts(
-                              text: firebaseAuth.currentUser!.displayName ==
-                                      snapshot.data!.docs[index]['name']
-                                  ? ''
-                                  : '${data.get('name')}',
-                              weight: FontWeight.w900,
-                            ),
-                            subtitle: Ts(
-                              text: firebaseAuth.currentUser!.email ==
-                                      snapshot.data!.docs[index]['email']
-                                  ? ''
-                                  : '${data.get('email')}',
-                            ),
-                          ),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 18.0),
-                            child: Divider(
-                              thickness: 1,
-                            ),
-                          )
-                        ],
-                      );
+                                const Padding(
+                                  padding:
+                                      EdgeInsets.symmetric(horizontal: 18.0),
+                                  child: Divider(
+                                    thickness: 1,
+                                  ),
+                                )
+                              ],
+                            );
                     },
                   ),
                 );
@@ -254,18 +239,18 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   /// on search press
-  onSearch() async {
-    await collectionReference
-        .where('email', isEqualTo: _search.text)
-        .get()
-        .then(
-      (value) {
-        setState(
-          () {
-            userMap = value.docs[0].data();
-          },
-        );
-      },
-    );
-  }
+  // onSearch() async {
+  //   await collectionReference
+  //       .where('email', isEqualTo: _search.text)
+  //       .get()
+  //       .then(
+  //     (value) {
+  //       setState(
+  //         () {
+  //           userMap = value.docs[0].data();
+  //         },
+  //       );
+  //     },
+  //   );
+  // }
 }
