@@ -9,3 +9,4 @@ GetStorage storage = GetStorage();
 FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
 
 CollectionReference collectionReference = firebaseFirestore.collection('users');
+CollectionReference phoneAuth = firebaseFirestore.collection('phoneAuth');

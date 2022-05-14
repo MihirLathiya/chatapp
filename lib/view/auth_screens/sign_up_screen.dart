@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:chatapp/common/text.dart';
 import 'package:chatapp/common/text_field.dart';
 import 'package:chatapp/constant.dart';
@@ -45,140 +46,142 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: isLoading
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
-          : SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 18.0),
-                child: Center(
-                  child: Form(
-                    key: formKey,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const SizedBox(
-                          height: 150,
-                        ),
-                        Ts(
-                          text: 'Welcome',
-                          size: 30,
-                          weight: FontWeight.w900,
-                        ),
-                        Ts(
-                          text: 'Create Account To Continue!',
-                          size: 20,
-                          height: 1.5,
-                          weight: FontWeight.w500,
-                          color: Colors.grey,
-                        ),
-                        const SizedBox(
-                          height: 30,
-                        ),
-                        InkWell(
-                          onTap: () {
-                            setImage();
-                          },
-                          child: Container(
-                            clipBehavior: Clip.antiAliasWithSaveLayer,
-                            height: 120,
-                            width: 120,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.grey,
-                            ),
-                            child: userImage == null
-                                ? const Icon(Icons.add)
-                                : Image.file(
-                                    userImage!,
-                                    fit: BoxFit.cover,
-                                  ),
+      body: Obx(
+        () => loadingController.isLoad.value
+            ? const Center(
+                child: CircularProgressIndicator(),
+              )
+            : SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                  child: Center(
+                    child: Form(
+                      key: formKey,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(
+                            height: 150,
                           ),
-                        ),
-                        const SizedBox(
-                          height: 30,
-                        ),
-                        TsField(
-                          hintText: 'UserName',
-                          validator: (value) {
-                            if (value.isEmpty) {
-                              return 'Enter UserName';
-                            }
-                            return null;
-                          },
-                          controller: userName,
-                          prefixIcon: const Icon(Icons.person_outline),
-                          hide: false,
-                        ),
-                        TsField(
-                          hintText: 'Email',
-                          validator: (value) {
-                            if (value.isEmpty) {
-                              return 'Enter Email';
-                            }
-                            return null;
-                          },
-                          controller: email,
-                          prefixIcon: const Icon(Icons.email_outlined),
-                          hide: false,
-                        ),
-                        Obx(
-                          () => TsField(
-                            hintText: 'Password',
+                          Ts(
+                            text: 'Welcome',
+                            size: 30,
+                            weight: FontWeight.w900,
+                          ),
+                          Ts(
+                            text: 'Create Account To Continue!',
+                            size: 20,
+                            height: 1.5,
+                            weight: FontWeight.w500,
+                            color: Colors.grey,
+                          ),
+                          const SizedBox(
+                            height: 30,
+                          ),
+                          InkWell(
+                            onTap: () {
+                              setImage();
+                            },
+                            child: Container(
+                              clipBehavior: Clip.antiAliasWithSaveLayer,
+                              height: 120,
+                              width: 120,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.grey,
+                              ),
+                              child: userImage == null
+                                  ? const Icon(Icons.add)
+                                  : Image.file(
+                                      userImage!,
+                                      fit: BoxFit.cover,
+                                    ),
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 30,
+                          ),
+                          TsField(
+                            hintText: 'UserName',
                             validator: (value) {
                               if (value.isEmpty) {
-                                return 'Enter Password';
+                                return 'Enter UserName';
                               }
                               return null;
                             },
-                            controller: password,
-                            prefixIcon: const Icon(Icons.lock_outline),
-                            icon: passwordController.isShow.value
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
-                            onPress: () {
-                              passwordController.isShowing();
-                            },
-                            hide: passwordController.isShow.value,
+                            controller: userName,
+                            prefixIcon: const Icon(Icons.person_outline),
+                            hide: false,
                           ),
-                        ),
-                        const SizedBox(
-                          height: 30,
-                        ),
-                        SizedBox(
-                          height: 50,
-                          width: 400,
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              await signUpUser();
+                          TsField(
+                            hintText: 'Email',
+                            validator: (value) {
+                              if (value.isEmpty) {
+                                return 'Enter Email';
+                              }
+                              return null;
                             },
-                            child: Ts(
-                              text: 'SIGN UP',
+                            controller: email,
+                            prefixIcon: const Icon(Icons.email_outlined),
+                            hide: false,
+                          ),
+                          Obx(
+                            () => TsField(
+                              hintText: 'Password',
+                              validator: (value) {
+                                if (value.isEmpty) {
+                                  return 'Enter Password';
+                                }
+                                return null;
+                              },
+                              controller: password,
+                              prefixIcon: const Icon(Icons.lock_outline),
+                              icon: passwordController.isShow.value
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                              onPress: () {
+                                passwordController.isShowing();
+                              },
+                              hide: passwordController.isShow.value,
                             ),
                           ),
-                        ),
-                        const SizedBox(
-                          height: 30,
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Get.to(
-                              () => const LogInScreen(),
-                            );
-                          },
-                          child: Ts(
-                            text: 'LOGIN',
-                            color: Colors.blue,
-                            weight: FontWeight.w900,
+                          const SizedBox(
+                            height: 30,
                           ),
-                        )
-                      ],
+                          SizedBox(
+                            height: 50,
+                            width: 400,
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                await signUpUser();
+                              },
+                              child: Ts(
+                                text: 'SIGN UP',
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 30,
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              Get.to(
+                                () => const LogInScreen(),
+                              );
+                            },
+                            child: Ts(
+                              text: 'LOGIN',
+                              color: Colors.blue,
+                              weight: FontWeight.w900,
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
+      ),
     );
   }
 
@@ -188,7 +191,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         isLoading = true;
       });
       String? imageUrl =
-          await uploaddImage(userImage, '${firebaseAuth.currentUser?.email}');
+          await uploaddImage(userImage, '${Random().nextInt(10000)}.jpg');
       EmailAuth.signUp(userName.text, email.text, password.text).then(
         (user) {
           if (user != null) {
@@ -216,6 +219,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             'password': password.text,
             'name': userName.text,
             'image': imageUrl,
+            'uid': firebaseAuth.currentUser!.uid,
             'status': 'Offline',
           },
         ),

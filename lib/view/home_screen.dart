@@ -1,5 +1,6 @@
 import 'package:chatapp/common/text_field.dart';
 import 'package:chatapp/constant.dart';
+import 'package:chatapp/controller/mode_controller.dart';
 import 'package:chatapp/service/email_auth.dart';
 import 'package:chatapp/view/auth_screens/log_in_screen.dart';
 import 'package:chatapp/view/chat_room.dart';
@@ -29,10 +30,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   bool mode = true;
+  ModController modController = Get.put(ModController());
 
-  // Map<String, dynamic>? userMap;
-  // List<String> menu = ['Profile'];
-  // String user1 = 'hi';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,18 +44,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           latterSpace: 1.5,
         ),
         actions: [
-          Switch(
-              value: mode,
+          Obx(
+            () => Switch(
+              value: modController.isChange.value,
               onChanged: (value) {
-                setState(() {
-                  mode = value;
-                });
-                if (mode == true) {
+                modController.isChangeMode(value);
+                if (modController.isChange.value == true) {
                   Get.changeTheme(ThemeData.dark());
                 } else {
                   Get.changeTheme(ThemeData.light());
                 }
-              }),
+              },
+            ),
+          ),
           PopupMenuButton(
             itemBuilder: (context) => [
               PopupMenuItem(
@@ -190,8 +190,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     itemBuilder: (BuildContext context, int index) {
                       var data = snapshot.data!.docs[index];
 
-                      return firebaseAuth.currentUser!.email ==
-                              snapshot.data!.docs[index]['email']
+                      return firebaseAuth.currentUser!.uid ==
+                              snapshot.data!.docs[index]['uid']
                           ? const SizedBox()
                           : Column(
                               children: [

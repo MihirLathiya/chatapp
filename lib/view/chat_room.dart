@@ -1,10 +1,8 @@
 import 'dart:io';
-
 import 'package:chatapp/common/text_field.dart';
 import 'package:chatapp/constant.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -16,7 +14,7 @@ class ChatRoom extends StatefulWidget {
   final String? image;
   final String? hi;
 
-  ChatRoom({
+  const ChatRoom({
     Key? key,
     this.chatRoomId,
     this.name,
@@ -214,8 +212,34 @@ class _ChatRoomState extends State<ChatRoom> {
                                               fit: BoxFit.cover,
                                             ),
                                           )
-                                        : const Center(
-                                            child: CircularProgressIndicator(),
+                                        : Container(
+                                            height: 200,
+                                            width: 200,
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  Colors.black.withAlpha(100),
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                12,
+                                              ),
+                                            ),
+                                            child: Center(
+                                              child: Stack(
+                                                children: [
+                                                  Center(
+                                                    child: GestureDetector(
+                                                      child: const Icon(
+                                                        Icons.close,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  const Center(
+                                                    child:
+                                                        CircularProgressIndicator(),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
                                           ),
                                   ),
                                 ),
@@ -228,7 +252,6 @@ class _ChatRoomState extends State<ChatRoom> {
                 }
               },
             ),
-            // Spacer(),
             Container(
               height: 60,
               width: double.infinity,
@@ -291,11 +314,11 @@ class _ChatRoomState extends State<ChatRoom> {
 
 class ShowImage extends StatelessWidget {
   final String? imageUrl;
-  ShowImage({Key? key, this.imageUrl}) : super(key: key);
+  const ShowImage({Key? key, this.imageUrl}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: double.infinity,
       width: double.infinity,
       child: Image.network(imageUrl!),
